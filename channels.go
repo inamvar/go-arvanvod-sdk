@@ -129,6 +129,26 @@ func (c *Client) GetChannel(ctx context.Context, channel string) (*ChannelModel,
 	return response, nil
 }
 
+// delete a specifed channel
+func (c *Client) DeleteChannel(ctx context.Context, channel string) error {
+
+	requestURL := fmt.Sprintf("%s/channels/%s", c.options.BaseUrl, channel)
+	req, err := http.NewRequestWithContext(ctx, http.MethodDelete, requestURL, nil)
+	if err != nil {
+		return err
+	}
+
+	// add authorization header to the req
+	req.Header.Add("Authorization", fmt.Sprintf("Apikey %s", c.options.ApiKey))
+	res, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return err
+	}
+
+	return getErrorByStatus(res.StatusCode)
+
+}
+
 type ChannelPresentType string
 
 const (
