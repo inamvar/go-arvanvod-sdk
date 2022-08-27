@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"time"
 )
 
 // Set subdomain for VOD service
@@ -76,5 +77,9 @@ type SetSubDomainModel struct {
 }
 
 type GetSubdomainModel struct {
-	Subdomain string `json:"subdomain"`
+	Data struct {
+		Subdomain string     `json:"subdomain"`
+		Domain    string     `json:"domain"`
+		CreatedAT *time.Time `json:"created_at"`
+	} `json:"data"`
 }

@@ -10,10 +10,10 @@ import (
 )
 
 // store a newly channel
-func (c *Client) CreateChannel(ctx context.Context, model *ChannelModel) error {
+func (c *Client) CreateChannel(ctx context.Context, model CreateUpdateChannelModel) (*CreateChannelResp, error) {
 	jsonBody, err := json.Marshal(model)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	bodyReader := bytes.NewReader(jsonBody)
@@ -21,21 +21,38 @@ func (c *Client) CreateChannel(ctx context.Context, model *ChannelModel) error {
 	requestURL := fmt.Sprintf("%s/channels", c.options.BaseUrl)
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, requestURL, bodyReader)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	// add authorization header to the req
 	req.Header.Add("Authorization", fmt.Sprintf("Apikey %s", c.options.ApiKey))
+	req.Header.Add("Content-Type", "application/json")
 	res, err := http.DefaultClient.Do(req)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	return getErrorByStatus(res.StatusCode)
+	err = getErrorByStatus(res.StatusCode)
+	if err != nil {
+		return nil, err
+	}
+
+	defer res.Body.Close()
+	resBody, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	response := new(CreateChannelResp)
+	err = json.Unmarshal(resBody, response)
+	if err != nil {
+		return nil, err
+	}
+	return response, nil
 
 }
 
 // update a channel
-func (c *Client) UpdateChannel(ctx context.Context, channel string, model *ChannelModel) error {
+func (c *Client) UpdateChannel(ctx context.Context, channel string, model CreateUpdateChannelModel) error {
 	jsonBody, err := json.Marshal(model)
 	if err != nil {
 		return err
@@ -70,6 +87,7 @@ func (c *Client) GetChannels(ctx context.Context, filter string, page, perPage i
 
 	// add authorization header to the req
 	req.Header.Add("Authorization", fmt.Sprintf("Apikey %s", c.options.ApiKey))
+
 	res, err := http.DefaultClient.Do(req)
 	if err != nil {
 		return nil, err
@@ -95,7 +113,7 @@ func (c *Client) GetChannels(ctx context.Context, filter string, page, perPage i
 }
 
 // Get a specifed channel
-func (c *Client) GetChannel(ctx context.Context, channel string) (*ChannelModel, error) {
+func (c *Client) GetChannel(ctx context.Context, channel string) (*GetChannelResp, error) {
 
 	requestURL := fmt.Sprintf("%s/channels/%s", c.options.BaseUrl, channel)
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, requestURL, nil)
@@ -121,7 +139,7 @@ func (c *Client) GetChannel(ctx context.Context, channel string) (*ChannelModel,
 		return nil, err
 	}
 
-	response := new(ChannelModel)
+	response := new(GetChannelResp)
 	err = json.Unmarshal(resBody, response)
 	if err != nil {
 		return nil, err
@@ -157,18 +175,38 @@ const (
 )
 
 type ChannelModel struct {
+	Id                string             `json:"id"`
 	Title             string             `json:"title"`
 	Description       string             `json:"description"`
-	SecureLinkEnabled bool               `json:"secure_link_enabled"`
+	SecureLinkEnabled int                `json:"secure_link_enabled"`
 	SecureLinkKey     string             `json:"secure_link_key"`
 	SecureLinkWithIp  bool               `json:"secure_link_with_ip"`
-	AdsEnabled        bool               `json:"ads_enabled"`
+	AdsEnabled        int                `json:"ads_enabled"`
 	PresentType       ChannelPresentType `json:"present_type"`
 	CampaignId        string             `json:"campaign_id"`
 }
 
+type CreateUpdateChannelModel struct {
+	Title             string             `json:"title"`
+	Description       string             `json:"description"`
+	SecureLinkEnabled int                `json:"secure_link_enabled"`
+	SecureLinkKey     string             `json:"secure_link_key"`
+	SecureLinkWithIp  bool               `json:"secure_link_with_ip"`
+	AdsEnabled        int                `json:"ads_enabled"`
+	PresentType       ChannelPresentType `json:"present_type"`
+	CampaignId        string             `json:"campaign_id"`
+}
 type GetChannelsModel struct {
-	Data []ChannelModel  `json:"data"`
-	Links  *Links   `json:"links"`
-	Meta   *Meta  `json:"meta"`
+	Data  []ChannelModel `json:"data"`
+	Links *Links         `json:"links"`
+	Meta  *Meta          `json:"meta"`
+}
+
+type CreateChannelResp struct {
+	Data    ChannelModel `json:"data"`
+	Message string       `json:"message"`
+}
+
+type GetChannelResp struct {
+	Data ChannelModel `json:"data"`
 }
