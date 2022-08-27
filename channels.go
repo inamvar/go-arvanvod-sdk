@@ -23,6 +23,33 @@ func (c *Client) CreateChannel(ctx context.Context, model *CreateChannelModel) e
 	if err != nil {
 		return err
 	}
+	// add authorization header to the req
+	req.Header.Add("Authorization", fmt.Sprintf("Apikey %s", c.options.ApiKey))
+	res, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return err
+	}
+
+	return getErrorByStatus(res.StatusCode)
+
+}
+
+// update a channel
+func (c *Client) UpdateChannel(ctx context.Context, model *UpdateChannelModel) error {
+	jsonBody, err := json.Marshal(model)
+	if err != nil {
+		return err
+	}
+
+	bodyReader := bytes.NewReader(jsonBody)
+
+	requestURL := fmt.Sprintf("%s/channels", c.options.BaseUrl)
+	req, err := http.NewRequestWithContext(ctx, http.MethodPatch, requestURL, bodyReader)
+	if err != nil {
+		return err
+	}
+	// add authorization header to the req
+	req.Header.Add("Authorization", fmt.Sprintf("Apikey %s", c.options.ApiKey))
 	res, err := http.DefaultClient.Do(req)
 	if err != nil {
 		return err
@@ -40,6 +67,9 @@ func (c *Client) GetChannels(ctx context.Context, filter string, page, perPage i
 	if err != nil {
 		return nil, err
 	}
+
+	// add authorization header to the req
+	req.Header.Add("Authorization", fmt.Sprintf("Apikey %s", c.options.ApiKey))
 	res, err := http.DefaultClient.Do(req)
 	if err != nil {
 		return nil, err
@@ -83,4 +113,15 @@ type CreateChannelModel struct {
 }
 
 type GetChannelsModel struct {
+}
+
+type UpdateChannelModel struct {
+	Title             string             `json:"title"`
+	Description       string             `json:"description"`
+	SecureLinkEnabled bool               `json:"secure_link_enabled"`
+	SecureLinkKey     string             `json:"secure_link_key"`
+	SecureLinkWithIp  bool               `json:"secure_link_with_ip"`
+	AdsEnabled        bool               `json:"ads_enabled"`
+	PresentType       ChannelPresentType `json:"present_type"`
+	CampaignId        string             `json:"campaign_id"`
 }

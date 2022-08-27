@@ -24,6 +24,8 @@ func (c *Client) SetDomain(ctx context.Context, subdomain *SetSubDomainModel) er
 	if err != nil {
 		return err
 	}
+	// add authorization header to the req
+	req.Header.Add("Authorization", fmt.Sprintf("Apikey %s", c.options.ApiKey))
 	res, err := http.DefaultClient.Do(req)
 	if err != nil {
 		return err
@@ -41,6 +43,10 @@ func (c *Client) GetDomain(ctx context.Context) (*GetSubdomainModel, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	// add authorization header to the req
+	req.Header.Add("Authorization", fmt.Sprintf("Apikey %s", c.options.ApiKey))
+
 	res, err := http.DefaultClient.Do(req)
 	if err != nil {
 		return nil, err
