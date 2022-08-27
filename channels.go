@@ -35,7 +35,7 @@ func (c *Client) CreateChannel(ctx context.Context, model *CreateChannelModel) e
 }
 
 // update a channel
-func (c *Client) UpdateChannel(ctx context.Context, model *UpdateChannelModel) error {
+func (c *Client) UpdateChannel(ctx context.Context, channel string, model *UpdateChannelModel) error {
 	jsonBody, err := json.Marshal(model)
 	if err != nil {
 		return err
@@ -43,7 +43,7 @@ func (c *Client) UpdateChannel(ctx context.Context, model *UpdateChannelModel) e
 
 	bodyReader := bytes.NewReader(jsonBody)
 
-	requestURL := fmt.Sprintf("%s/channels", c.options.BaseUrl)
+	requestURL := fmt.Sprintf("%s/channels/%s", c.options.BaseUrl, channel)
 	req, err := http.NewRequestWithContext(ctx, http.MethodPatch, requestURL, bodyReader)
 	if err != nil {
 		return err
