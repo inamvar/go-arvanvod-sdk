@@ -10,7 +10,7 @@ import (
 )
 
 // store a newly channel
-func (c *Client) CreateChannel(ctx context.Context, model *CreateChannelModel) error {
+func (c *Client) CreateChannel(ctx context.Context, model *ChannelModel) error {
 	jsonBody, err := json.Marshal(model)
 	if err != nil {
 		return err
@@ -35,7 +35,7 @@ func (c *Client) CreateChannel(ctx context.Context, model *CreateChannelModel) e
 }
 
 // update a channel
-func (c *Client) UpdateChannel(ctx context.Context, channel string, model *UpdateChannelModel) error {
+func (c *Client) UpdateChannel(ctx context.Context, channel string, model *ChannelModel) error {
 	jsonBody, err := json.Marshal(model)
 	if err != nil {
 		return err
@@ -94,6 +94,41 @@ func (c *Client) GetChannels(ctx context.Context, filter string, page, perPage i
 	return response, nil
 }
 
+// Get a specifed channel
+func (c *Client) GetChannel(ctx context.Context, channel string) (*ChannelModel, error) {
+
+	requestURL := fmt.Sprintf("%s/channels/%s", c.options.BaseUrl, channel)
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, requestURL, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	// add authorization header to the req
+	req.Header.Add("Authorization", fmt.Sprintf("Apikey %s", c.options.ApiKey))
+	res, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return nil, err
+	}
+
+	err = getErrorByStatus(res.StatusCode)
+	if err != nil {
+		return nil, err
+	}
+
+	defer res.Body.Close()
+	resBody, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	response := new(ChannelModel)
+	err = json.Unmarshal(resBody, response)
+	if err != nil {
+		return nil, err
+	}
+	return response, nil
+}
+
 type ChannelPresentType string
 
 const (
@@ -101,7 +136,7 @@ const (
 	ChannelPresentManual ChannelPresentType = "manual"
 )
 
-type CreateChannelModel struct {
+type ChannelModel struct {
 	Title             string             `json:"title"`
 	Description       string             `json:"description"`
 	SecureLinkEnabled bool               `json:"secure_link_enabled"`
@@ -113,15 +148,4 @@ type CreateChannelModel struct {
 }
 
 type GetChannelsModel struct {
-}
-
-type UpdateChannelModel struct {
-	Title             string             `json:"title"`
-	Description       string             `json:"description"`
-	SecureLinkEnabled bool               `json:"secure_link_enabled"`
-	SecureLinkKey     string             `json:"secure_link_key"`
-	SecureLinkWithIp  bool               `json:"secure_link_with_ip"`
-	AdsEnabled        bool               `json:"ads_enabled"`
-	PresentType       ChannelPresentType `json:"present_type"`
-	CampaignId        string             `json:"campaign_id"`
 }
