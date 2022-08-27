@@ -168,4 +168,7 @@ type ChannelModel struct {
 }
 
 type GetChannelsModel struct {
+	Data []ChannelModel  `json:"data"`
+	Links  *Links   `json:"links"`
+	Meta   *Meta  `json:"meta"`
 }
