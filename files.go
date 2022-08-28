@@ -4,7 +4,9 @@ import (
 	"bytes"
 	"context"
 	"encoding/base64"
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"strconv"
 	"strings"
@@ -106,4 +108,48 @@ func (c *Client) UlpoadFileBytes(ctx context.Context, channel, file string, data
 		return -1, err
 	}
 	return offset, nil
+}
+
+func (c *Client) GetAllDraftFiles(ctx context.Context, channel string) (*DrafFilesResp, error) {
+	requestURL := fmt.Sprintf("%s/channels/%s/files", c.options.BaseUrl, channel)
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, requestURL, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	// add authorization header to the req
+	req.Header.Add("Authorization", fmt.Sprintf("Apikey %s", c.options.ApiKey))
+
+	res, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return nil, err
+	}
+
+	err = getErrorByStatus(res.StatusCode)
+	if err != nil {
+		return nil, err
+	}
+
+	defer res.Body.Close()
+	resBody, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	response := new(DrafFilesResp)
+	err = json.Unmarshal(resBody, response)
+	if err != nil {
+		return nil, err
+	}
+	return response, nil
+}
+
+type FileModel struct {
+	Id string `json:"id"`
+}
+
+type DrafFilesResp struct {
+	Data  []FileModel `json:"data"`
+	Links *Links      `json:"links"`
+	Meta  *Meta       `json:"meta"`
 }
