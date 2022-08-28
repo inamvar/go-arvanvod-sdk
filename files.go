@@ -144,6 +144,58 @@ func (c *Client) GetAllDraftFiles(ctx context.Context, channel string) (*DrafFil
 	return response, nil
 }
 
+func (c *Client) GetSpecifiedFile(ctx context.Context, file string) (*GetSpecifiedFileResp, error) {
+	requestURL := fmt.Sprintf("%s/files/%s", c.options.BaseUrl, file)
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, requestURL, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	// add authorization header to the req
+	req.Header.Add("Authorization", fmt.Sprintf("Apikey %s", c.options.ApiKey))
+	res, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return nil, err
+	}
+
+	err = getErrorByStatus(res.StatusCode)
+	if err != nil {
+		return nil, err
+	}
+
+	defer res.Body.Close()
+	resBody, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	response := new(GetSpecifiedFileResp)
+	err = json.Unmarshal(resBody, response)
+	if err != nil {
+		return nil, err
+	}
+	return response, nil
+}
+
+func (c *Client) DeleteFile(ctx context.Context, file string) error {
+
+	requestURL := fmt.Sprintf("%s/files/%s", c.options.BaseUrl, file)
+	req, err := http.NewRequestWithContext(ctx, http.MethodDelete, requestURL, nil)
+	if err != nil {
+		return err
+	}
+
+	// add authorization header to the req
+	req.Header.Add("Authorization", fmt.Sprintf("Apikey %s", c.options.ApiKey))
+	res, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return err
+	}
+
+	return getErrorByStatus(res.StatusCode)
+
+}
+
 type FileModel struct {
 	Id string `json:"id"`
 }
@@ -152,4 +204,8 @@ type DrafFilesResp struct {
 	Data  []FileModel `json:"data"`
 	Links *Links      `json:"links"`
 	Meta  *Meta       `json:"meta"`
+}
+
+type GetSpecifiedFileResp struct {
+	Data *FileModel `json:"data"`
 }
