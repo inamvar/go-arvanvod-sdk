@@ -12,6 +12,17 @@ import (
 	"strings"
 )
 
+/*
+Request a new upload file. See https://tus.io/ for more detail.
+
+meta:
+    (Required) To add additional metadata to the upload creation request.
+		* MUST contain 'filename' and 'filetype'. From all available fields only these two fields will be used.
+		* The key MUST NOT contain spaces and commas and MUST NOT be empty.
+length:
+	(Required) To indicate the size of entire upload in bytes
+
+*/
 func (c *Client) NewFileUpload(ctx context.Context, channel string, length int64, meta map[string]string) (string, error) {
 
 	requestURL := fmt.Sprintf("%s/channels/%s/files", c.options.BaseUrl, channel)
@@ -46,6 +57,7 @@ func (c *Client) NewFileUpload(ctx context.Context, channel string, length int64
 	return location, nil
 }
 
+// Get upload offset. See https://tus.io/ for more detail.
 func (c *Client) GetUploadOffset(ctx context.Context, channel, file string) (offset int, length int, err error) {
 
 	requestURL := fmt.Sprintf("%s/channels/%s/files/%s", c.options.BaseUrl, channel, file)
@@ -81,6 +93,7 @@ func (c *Client) GetUploadOffset(ctx context.Context, channel, file string) (off
 	return offset, length, nil
 }
 
+// Upload and apply bytes to a file. See https://tus.io/ for more detail.
 func (c *Client) UlpoadFileBytes(ctx context.Context, channel, file string, data []byte) (int, error) {
 	requestURL := fmt.Sprintf("%s/channels/%s/files/%s", c.options.BaseUrl, channel, file)
 	req, err := http.NewRequestWithContext(ctx, http.MethodPatch, requestURL, bytes.NewReader(data))
@@ -110,6 +123,7 @@ func (c *Client) UlpoadFileBytes(ctx context.Context, channel, file string, data
 	return offset, nil
 }
 
+// Return all draft files of channel.
 func (c *Client) GetAllDraftFiles(ctx context.Context, channel string) (*DrafFilesResp, error) {
 	requestURL := fmt.Sprintf("%s/channels/%s/files", c.options.BaseUrl, channel)
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, requestURL, nil)
@@ -144,6 +158,7 @@ func (c *Client) GetAllDraftFiles(ctx context.Context, channel string) (*DrafFil
 	return response, nil
 }
 
+// Return the specified file.
 func (c *Client) GetSpecifiedFile(ctx context.Context, file string) (*GetSpecifiedFileResp, error) {
 	requestURL := fmt.Sprintf("%s/files/%s", c.options.BaseUrl, file)
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, requestURL, nil)
@@ -177,6 +192,7 @@ func (c *Client) GetSpecifiedFile(ctx context.Context, file string) (*GetSpecifi
 	return response, nil
 }
 
+// Remove the specified file.
 func (c *Client) DeleteFile(ctx context.Context, file string) error {
 
 	requestURL := fmt.Sprintf("%s/files/%s", c.options.BaseUrl, file)

@@ -119,6 +119,7 @@ func (c *Client) SaveVideo(ctx context.Context, channel string, model *SaveVideo
 	return response, nil
 }
 
+// Get all channel's videos
 func (c *Client) GetAllChannelVideos(ctx context.Context, channel, filter string, page, perPage int) (*GetAllVideosResp, error) {
 	requestURL := fmt.Sprintf("%s/channels/%s/videos?filter=%s&page=%d&per_page=%d", c.options.BaseUrl, channel, filter, page, perPage)
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, requestURL, nil)
