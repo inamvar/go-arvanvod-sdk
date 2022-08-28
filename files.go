@@ -50,7 +50,7 @@ func (c *Client) NewFileUpload(ctx context.Context, channel string, length int64
 			metaData = append(metaData, fmt.Sprintf("%s %s", k, encodedValue))
 		}
 		//req.Header.Add("upload-metadata", strings.Join(metaData, ", "))
-		lowerCaseHeader["upload-metadata"] = []string{strings.Join(metaData, ", ")}
+		lowerCaseHeader["upload-metadata"] = []string{strings.Join(metaData, ",")}
 	}
 	req.Header = lowerCaseHeader
 
@@ -58,13 +58,13 @@ func (c *Client) NewFileUpload(ctx context.Context, channel string, length int64
 	if err != nil {
 		return "", err
 	}
-	defer res.Body.Close()
-	resBody, err := ioutil.ReadAll(res.Body)
-	if err != nil {
-		return "", err
-	}
+	// defer res.Body.Close()
+	// resBody, err := ioutil.ReadAll(res.Body)
+	// if err != nil {
+	// 	return "", err
+	// }
 
-	fmt.Printf("\n response: %s", string(resBody))
+	// fmt.Printf("\n response: %s", string(resBody))
 	err = getErrorByStatus(res.StatusCode)
 	if err != nil {
 		return "", err

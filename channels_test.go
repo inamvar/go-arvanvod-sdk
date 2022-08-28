@@ -27,9 +27,9 @@ func TestCreateAndDeleteChannel(t *testing.T) {
 	channel := arvanvod.CreateUpdateChannelModel{
 		Title:             "test",
 		Description:       "some description",
-		SecureLinkEnabled: 0,
-		SecureLinkKey:     "",
-		SecureLinkWithIp:  false,
+		SecureLinkEnabled: 1,
+		SecureLinkKey:     "some-secure-key",
+		SecureLinkWithIp:  true,
 		AdsEnabled:        0,
 		PresentType:       arvanvod.ChannelPeresentAuto,
 		CampaignId:        "",

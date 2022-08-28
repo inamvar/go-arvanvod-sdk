@@ -34,15 +34,15 @@ var (
 type SaveVideoReq struct {
 	Title           string             `json:"title"`
 	ConvertMode     VideoConvertMode   `json:"convert_mode"`
-	Description     string             `json:"description"`
-	VideoUrl        string             `json:"video_url"`
-	FileId          string             `json:"file_id"`
+	Description     string             `json:"description,omitempty"`
+	VideoUrl        string             `json:"video_url,omitempty"`
+	FileId          string             `json:"file_id,omitempty"`
 	ParallelConvert bool               `json:"parallel_convert"`
-	ThumbnailTime   int                `json:"thumbnail_time"`
-	WatermarkId     string             `json:"watermark_id"`
-	WatermarkArea   WatermarkArea      `json:"watermark_area"`
-	ConvertInfo     []VideoConvertInfo `json:"convert_info"`
-	Options         []VideoOption      `json:"options"`
+	ThumbnailTime   int                `json:"thumbnail_time,omitempty"`
+	WatermarkId     string             `json:"watermark_id,omitempty"`
+	WatermarkArea   WatermarkArea      `json:"watermark_area,omitempty"`
+	ConvertInfo     []VideoConvertInfo `json:"convert_info,omitempty"`
+	Options         []VideoOption      `json:"options,omitempty"`
 }
 
 //TODO: define SaveVideoResp properties
