@@ -32,22 +32,39 @@ func (c *Client) NewFileUpload(ctx context.Context, channel string, length int64
 	}
 	// add authorization header to the req
 	req.Header.Add("Authorization", fmt.Sprintf("Apikey %s", c.options.ApiKey))
-	req.Header.Add("tus-resumable", "1.0.0")
-	req.Header.Add("upload_length", fmt.Sprintf("%d", length))
+
+	lowerCaseHeader := make(http.Header)
+
+	for key, value := range req.Header {
+		lowerCaseHeader[key] = value
+	}
+	//req.Header.Add("tus-resumable", "1.0.0")
+	//req.Header.Add("upload-length", fmt.Sprintf("%d", length))
+	lowerCaseHeader["tus-resumable"] = []string{"1.0.0"}
+	lowerCaseHeader["upload-length"] = []string{fmt.Sprintf("%d", length)}
 
 	if meta != nil {
-		metaData := make([]string, len(meta))
+		metaData := make([]string, 0, len(meta))
 		for k, v := range meta {
 			encodedValue := base64.StdEncoding.EncodeToString([]byte(v))
 			metaData = append(metaData, fmt.Sprintf("%s %s", k, encodedValue))
 		}
-		req.Header.Add("upload-metadata", strings.Join(metaData, ","))
+		//req.Header.Add("upload-metadata", strings.Join(metaData, ", "))
+		lowerCaseHeader["upload-metadata"] = []string{strings.Join(metaData, ", ")}
 	}
+	req.Header = lowerCaseHeader
+
 	res, err := http.DefaultClient.Do(req)
 	if err != nil {
 		return "", err
 	}
+	defer res.Body.Close()
+	resBody, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		return "", err
+	}
 
+	fmt.Printf("\n response: %s", string(resBody))
 	err = getErrorByStatus(res.StatusCode)
 	if err != nil {
 		return "", err
@@ -67,7 +84,14 @@ func (c *Client) GetUploadOffset(ctx context.Context, channel, file string) (off
 	}
 	// add authorization header to the req
 	req.Header.Add("Authorization", fmt.Sprintf("Apikey %s", c.options.ApiKey))
-	req.Header.Add("tus-resumable", "1.0.0")
+
+	lowerCaseHeader := make(http.Header)
+
+	for key, value := range req.Header {
+		lowerCaseHeader[key] = value
+	}
+	lowerCaseHeader["tus-resumable"] = []string{"1.0.0"}
+	req.Header = lowerCaseHeader
 
 	res, err := http.DefaultClient.Do(req)
 	if err != nil {
@@ -102,8 +126,16 @@ func (c *Client) UlpoadFileBytes(ctx context.Context, channel, file string, data
 	}
 	// add authorization header to the req
 	req.Header.Add("Authorization", fmt.Sprintf("Apikey %s", c.options.ApiKey))
-	req.Header.Add("tus-resumable", "1.0.0")
+	//req.Header.Add("tus-resumable", "1.0.0")
 	req.Header.Add("Content-Type", "application/offset+octet-stream")
+
+	lowerCaseHeader := make(http.Header)
+
+	for key, value := range req.Header {
+		lowerCaseHeader[key] = value
+	}
+	lowerCaseHeader["tus-resumable"] = []string{"1.0.0"}
+	req.Header = lowerCaseHeader
 	res, err := http.DefaultClient.Do(req)
 	if err != nil {
 		return -1, err
