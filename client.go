@@ -13,7 +13,7 @@ type Client struct {
 	options *ClientOptions
 }
 
-// create new Client instane with given options
+// create new Client instanse with given options
 func NewClient(options *ClientOptions) *Client {
 	return &Client{
 		options: options,
