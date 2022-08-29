@@ -21,7 +21,7 @@ func TestUploadFile(t *testing.T) {
 	if assert.NoError(t, err) {
 		data, err := ioutil.ReadAll(file)
 		assert.Equal(t, nil, err)
-		length := len(data)
+		length := int64(len(data))
 		channel := "19fee3b0-a850-4fa6-bfb0-9563a19c811f"
 		meta := map[string]string{
 			"filename": filename,

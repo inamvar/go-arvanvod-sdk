@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"time"
 )
 
 type VideoConvertMode string
@@ -45,8 +46,60 @@ type SaveVideoReq struct {
 	Options         []VideoOption      `json:"options,omitempty"`
 }
 
-//TODO: define SaveVideoResp properties
 type SaveVideoResp struct {
+	Data *VideoModel `json:"data"`
+}
+
+type GetVideoResp struct {
+	Data *VideoModel `json:"data"`
+}
+
+type VideoModel struct {
+	Id          string `json:"id"`
+	Title       string `json:"title"`
+	Description string `json:"description"`
+	FileInfo    *struct {
+		General *struct {
+			Duration int    `json:"duration"`
+			Format   string `json:"format"`
+			BitRate  string `json:"bit_rate"`
+			Size     string `json:"size"`
+		} `json:"general,omitempty"`
+		Video *struct {
+			Codec     string `json:"codec"`
+			Width     int    `json:"width"`
+			Height    int    `json:"height"`
+			FrameRate string `json:"frame_rate"`
+			BitRate   string `json:"bit_rate"`
+		} `json:"video,omitempty"`
+		Audio *struct {
+			Codec         string `json:"codec"`
+			SampleRate    string `json:"sample_rate"`
+			BitRate       string `json:"bit_rate"`
+			ChannelLayout string `json:"channel_layout"`
+		} `json:"audio,omitempty"`
+	} `json:"file_info,omitempty"`
+
+	ThumbnailTime   int                `json:"thumbnail_time"`
+	Status          string             `json:"status"`
+	JobStatusUrl    string             `json:"job_status_url"`
+	Available       int                `json:"available"`
+	ConvertMode     VideoConvertMode   `json:"convert_mode"`
+	ConvertInfo     []VideoConvertInfo `json:"convert_info,omitempty"`
+	CreatedAt       *time.Time         `json:"created_at"`
+	UpdatedAt       *time.Time         `json:"updated_at"`
+	CompletedAt     *time.Time         `json:"completed_at"`
+	ParallelConvert int                `json:"parallel_convert"`
+	DirectorySize   string             `json:"directory_size"`
+	ConfigUrl       string             `json:"config_url"`
+	Mp4Videos       []string           `json:"mp4_videos"`
+	HlsPlayList     string             `json:"hls_playlist"`
+	DashPlaylist    string             `json:"dash_playlist"`
+	ThumbnailUrl    string             `json:"thumbnail_url"`
+	TooltipUrl      string             `json:"tooltip_url"`
+	VideoUrl        string             `json:"video_url"`
+	PlayerUrl       string             `json:"player_url"`
+	Channel         *ChannelModel      `json:"channel,omitempty"`
 }
 
 type VideoOption struct {
@@ -152,4 +205,58 @@ func (c *Client) GetAllChannelVideos(ctx context.Context, channel, filter string
 		return nil, err
 	}
 	return response, nil
+}
+
+// get a specified video
+func (c *Client) GetVideo(ctx context.Context, videoId string) (*GetVideoResp, error) {
+	requestURL := fmt.Sprintf("%s/videos/%s", c.options.BaseUrl, videoId)
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, requestURL, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	// add authorization header to the req
+	req.Header.Add("Authorization", fmt.Sprintf("Apikey %s", c.options.ApiKey))
+	res, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return nil, err
+	}
+
+	err = getErrorByStatus(res.StatusCode)
+	if err != nil {
+		return nil, err
+	}
+
+	defer res.Body.Close()
+	resBody, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	response := new(GetVideoResp)
+	err = json.Unmarshal(resBody, response)
+	if err != nil {
+		return nil, err
+	}
+	return response, nil
+}
+
+// delete a specifed video
+func (c *Client) DeleteVideo(ctx context.Context, videoId string) error {
+
+	requestURL := fmt.Sprintf("%s/videos/%s", c.options.BaseUrl, videoId)
+	req, err := http.NewRequestWithContext(ctx, http.MethodDelete, requestURL, nil)
+	if err != nil {
+		return err
+	}
+
+	// add authorization header to the req
+	req.Header.Add("Authorization", fmt.Sprintf("Apikey %s", c.options.ApiKey))
+	res, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return err
+	}
+
+	return getErrorByStatus(res.StatusCode)
+
 }
