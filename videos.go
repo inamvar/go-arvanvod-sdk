@@ -47,7 +47,14 @@ type SaveVideoReq struct {
 }
 
 type SaveVideoResp struct {
-	Data *VideoModel `json:"data"`
+	Data struct {
+		Id            string           `json:"id"`
+		Title         string           `json:"title"`
+		Description   string           `json:"description"`
+		ThumbnailTime int              `json:"thumbnail_time"`
+		Status        string           `json:"status"`
+		ConvertMode   VideoConvertMode `json:"convert_mode"`
+	} `json:"data"`
 }
 
 type GetVideoResp struct {
