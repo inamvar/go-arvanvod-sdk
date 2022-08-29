@@ -75,7 +75,7 @@ func (c *Client) NewFileUpload(ctx context.Context, channel string, length int64
 }
 
 // Get upload offset. See https://tus.io/ for more detail.
-func (c *Client) GetUploadOffset(ctx context.Context, channel, file string) (offset int, length int, err error) {
+func (c *Client) GetUploadOffset(ctx context.Context, channel, file string) (offset int64, length int64, err error) {
 
 	requestURL := fmt.Sprintf("%s/channels/%s/files/%s", c.options.BaseUrl, channel, file)
 	req, err := http.NewRequestWithContext(ctx, http.MethodHead, requestURL, nil)
@@ -105,12 +105,13 @@ func (c *Client) GetUploadOffset(ctx context.Context, channel, file string) (off
 
 	uploadOffset := res.Header.Get("Upload-Offset")
 
-	offset, err = strconv.Atoi(uploadOffset)
+	//offset, err = strconv.Atoi(uploadOffset)
+	offset, err = strconv.ParseInt(uploadOffset, 10, 64)
 	if err != nil {
 		return -1, -1, err
 	}
 	uploadLength := res.Header.Get("Upload-Length")
-	length, err = strconv.Atoi(uploadLength)
+	length, err = strconv.ParseInt(uploadLength, 10, 64)
 	if err != nil {
 		return -1, -1, err
 	}
@@ -118,7 +119,7 @@ func (c *Client) GetUploadOffset(ctx context.Context, channel, file string) (off
 }
 
 // Upload and apply bytes to a file. See https://tus.io/ for more detail.
-func (c *Client) UlpoadFileBytes(ctx context.Context, channel, file string, data []byte) (int, error) {
+func (c *Client) UlpoadFileBytes(ctx context.Context, channel, file string, data []byte) (int64, error) {
 	requestURL := fmt.Sprintf("%s/channels/%s/files/%s", c.options.BaseUrl, channel, file)
 	req, err := http.NewRequestWithContext(ctx, http.MethodPatch, requestURL, bytes.NewReader(data))
 	if err != nil {
@@ -147,11 +148,14 @@ func (c *Client) UlpoadFileBytes(ctx context.Context, channel, file string, data
 	}
 
 	uploadOffset := res.Header.Get("Upload-Offset")
-
-	offset, err := strconv.Atoi(uploadOffset)
+	offset, err := strconv.ParseInt(uploadOffset, 10, 64)
 	if err != nil {
 		return -1, err
 	}
+	// offset, err := strconv.Atoi(uploadOffset)
+	// if err != nil {
+	// 	return -1, err
+	// }
 	return offset, nil
 }
 

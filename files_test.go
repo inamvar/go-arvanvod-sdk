@@ -33,7 +33,7 @@ func TestUploadFile(t *testing.T) {
 			ss := strings.Split(location, "/")
 			fileId := ss[len(ss)-1]
 
-			step := 1000000
+			step := int64(1000000)
 			for {
 				offset, len, err := client.GetUploadOffset(context.Background(), channel, fileId)
 				assert.Equal(t, nil, err)
