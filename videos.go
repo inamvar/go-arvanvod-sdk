@@ -133,6 +133,9 @@ type GetAllVideosResp struct {
 // Convert_info (must be an array and this will be required if convert mode has set to manual)
 // Watermark_area (should be one of: center, fix_top_left, fix_top_right, fix_top_center, fix_bottom_left, fix_bottom_right, fix_bottom_center, animate_left_to_right, animate_top_to_bottom)
 func (c *Client) SaveVideo(ctx context.Context, channel string, model *SaveVideoReq) (*SaveVideoResp, error) {
+
+	model.Title = RemoveSymbols(model.Title)
+	model.Description = RemoveSymbols(model.Description)
 	jsonBody, err := json.Marshal(model)
 	if err != nil {
 		return nil, err
