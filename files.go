@@ -119,7 +119,7 @@ func (c *Client) GetUploadOffset(ctx context.Context, channel, file string) (off
 }
 
 // Upload and apply bytes to a file. See https://tus.io/ for more detail.
-func (c *Client) UlpoadFileBytes(ctx context.Context, channel, file string, data []byte) (int64, error) {
+func (c *Client) UploadFileBytes(ctx context.Context, channel, file string, data []byte) (int64, error) {
 	requestURL := fmt.Sprintf("%s/channels/%s/files/%s", c.options.BaseUrl, channel, file)
 	req, err := http.NewRequestWithContext(ctx, http.MethodPatch, requestURL, bytes.NewReader(data))
 	if err != nil {

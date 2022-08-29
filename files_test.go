@@ -46,7 +46,7 @@ func TestUploadFile(t *testing.T) {
 					end = offset + step
 				}
 				bytes := data[offset:end]
-				offset, err = client.UlpoadFileBytes(context.Background(), channel, fileId, bytes)
+				offset, err = client.UploadFileBytes(context.Background(), channel, fileId, bytes)
 				assert.Equal(t, nil, err)
 				fmt.Printf("\n len: %d, offset: %d", len, offset)
 				if offset == len || err != nil {
