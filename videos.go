@@ -127,6 +127,11 @@ type VideoConvertInfo struct {
 	Resolution   string `json:"resolution"`
 }
 
+type UpdateVideoReq struct {
+	Title       string `json:"title"`
+	Description string `json:"description"`
+}
+
 //TODO: define GetAllVideosResp properties
 type GetAllVideosResp struct {
 }
@@ -269,4 +274,34 @@ func (c *Client) DeleteVideo(ctx context.Context, videoId string) error {
 
 	return getErrorByStatus(res.StatusCode)
 
+}
+
+func (c *Client) UpdateVideo(ctx context.Context, title, description, videoId string) error {
+
+	model := UpdateVideoReq{
+		Title:       RemoveSymbols(title),
+		Description: RemoveSymbols(description),
+	}
+
+	jsonBody, err := json.Marshal(model)
+	if err != nil {
+		return err
+	}
+
+	bodyReader := bytes.NewReader(jsonBody)
+
+	requestURL := fmt.Sprintf("%s/videos/%s", c.options.BaseUrl, videoId)
+	req, err := http.NewRequestWithContext(ctx, http.MethodPatch, requestURL, bodyReader)
+	if err != nil {
+		return err
+	}
+
+	// add authorization header to the req
+	req.Header.Add("Authorization", fmt.Sprintf("Apikey %s", c.options.ApiKey))
+	res, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return err
+	}
+
+	return getErrorByStatus(res.StatusCode)
 }
