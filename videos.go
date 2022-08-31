@@ -267,6 +267,7 @@ func (c *Client) DeleteVideo(ctx context.Context, videoId string) error {
 
 	// add authorization header to the req
 	req.Header.Add("Authorization", fmt.Sprintf("Apikey %s", c.options.ApiKey))
+
 	res, err := http.DefaultClient.Do(req)
 	if err != nil {
 		return err
@@ -298,6 +299,7 @@ func (c *Client) UpdateVideo(ctx context.Context, title, description, videoId st
 
 	// add authorization header to the req
 	req.Header.Add("Authorization", fmt.Sprintf("Apikey %s", c.options.ApiKey))
+	req.Header.Add("Content-Type", "application/json")
 	res, err := http.DefaultClient.Do(req)
 	if err != nil {
 		return err
