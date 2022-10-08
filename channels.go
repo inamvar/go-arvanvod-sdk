@@ -173,6 +173,7 @@ type ChannelPresentType string
 const (
 	ChannelPeresentAuto  ChannelPresentType = "auto"
 	ChannelPresentManual ChannelPresentType = "manual"
+	ChannelPresentNone   ChannelPresentType = ""
 )
 
 type ChannelModel struct {
