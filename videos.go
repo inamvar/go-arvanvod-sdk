@@ -106,7 +106,7 @@ type VideoModel struct {
 	TooltipUrl      string             `json:"tooltip_url"`
 	VideoUrl        string             `json:"video_url"`
 	PlayerUrl       string             `json:"player_url"`
-	Channel         *ChannelModel      `json:"channel,omitempty"`
+	//	Channel         *ChannelModel      `json:"channel,omitempty"`
 }
 
 type VideoOption struct {
